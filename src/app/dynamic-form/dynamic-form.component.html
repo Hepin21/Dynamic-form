@@ -118,18 +118,18 @@
 </ng-template>
 
 <ng-template
-  #radio
-  let-data="data"
-  let-control="control"
-  let-group="group"
-  let-allProperties="allProperties"
-  let-key="key"
+#radio
+let-data="data"
+let-control="control"
+let-group="group"
+let-allProperties="allProperties"
+let-key="key"
 >
   <div [formGroup]="group">
     <p-selectButton
       [options]="data.options"
       [formControlName]="control"
-      optionLabel="label"
+      optionLabel="value"
       optionValue="value"
       (onChange)="
         radioChange(
@@ -160,7 +160,7 @@
       [options]="data.options"
       [formControlName]="control"
       placeholder="{{ data.value || 'Select Option' }}"
-      [optionLabel]="data.optionLabel"
+      [optionLabel]="data.optionValue"
     >
     </p-dropdown>
 
@@ -309,7 +309,7 @@
     <p-multiSelect
       [formControlName]="control"
       [options]="data.options"
-      [optionLabel]="data.optionLabel"      
+      [optionLabel]="data.optionValue"      
       placeholder="{{ data.placeholder || 'Select Option' }}"
     >
     </p-multiSelect>

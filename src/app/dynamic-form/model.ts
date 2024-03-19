@@ -39,6 +39,7 @@ interface DynamicSwitchField extends BaseDynamicField {
 interface DynamicRadioField extends BaseDynamicField {
   inputType: 'radio' | 'mcq';
   options: { label: string; value: any; dependents?: string[] }[];
+  optionValue?: string;
 }
 
 interface DynamicSelectField extends BaseDynamicField {

@@ -52,7 +52,8 @@ export class AppComponent {
           },
         ],
         description: 'Date Sent',
-        optionLabel: 'label',
+        optionValue: 'value',
+        // optionLabel: 'label',
       },
       days: {
         type: 'string',
@@ -89,8 +90,8 @@ export class AppComponent {
           },
         ],
         description: 'days',
-        // optionValue: 'label',
-        optionLabel: 'value',
+        optionValue: 'value',
+        // optionLabel: 'value',
       },
       plaintiff: {
         type: 'string',
@@ -139,6 +140,7 @@ export class AppComponent {
           },
         ],
         styleClass: 'col-4',
+        optionValue: 'value',
         description: 'More than one defendant',
       },
       address: {

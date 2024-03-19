@@ -8,23 +8,25 @@ import { createCustomElement } from '@angular/elements';
 @NgModule({
   declarations: [AppComponent],
   providers: [],
-  // bootstrap: [AppComponent],
-    bootstrap: [],
+  bootstrap: [AppComponent],
+    // bootstrap: [],
 
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  // schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [BrowserModule, DynamicFormComponent], //Add DynamicFormComponent Because of Standalone Compo...
 })
-// export class AppModule {}
-export class AppModule implements DoBootstrap{ 
+export class AppModule {}
 
-  constructor(private injector: Injector){}
 
-  ngDoBootstrap(appRef : ApplicationRef): void {
-      const Form = createCustomElement(DynamicFormComponent,{injector: this.injector});
-      customElements.define('add-webc', Form);   //*Use for Create and Register Custom Web Component     direct ng build and compile this component
-      // const showTodos = createCustomElement(TodosComponent,{injector: this.injector});
-      // customElements.define('show-todos', showTodos);   //*Use for Create and Register Custom Web Component
-      // const about = createCustomElement(AboutComponent,{injector: this.injector});
-      // customElements.define('about-todos', about);   //*Use for Create and Register Custom Web Component
-  }
- }
+// export class AppModule implements DoBootstrap{ 
+
+//   constructor(private injector: Injector){}
+
+//   ngDoBootstrap(appRef : ApplicationRef): void {
+//       const Form = createCustomElement(DynamicFormComponent,{injector: this.injector});
+//       customElements.define('add-webc', Form);   //*Use for Create and Register Custom Web Component     direct ng build and compile this component
+//       // const showTodos = createCustomElement(TodosComponent,{injector: this.injector});
+//       // customElements.define('show-todos', showTodos);   //*Use for Create and Register Custom Web Component
+//       // const about = createCustomElement(AboutComponent,{injector: this.injector});
+//       // customElements.define('about-todos', about);   //*Use for Create and Register Custom Web Component
+//   }
+//  }
