@@ -1,0 +1,468 @@
+<ng-container>
+  <div [style]="'font-family:' + fontFamily">
+    <div>
+      <div class="flex justify-content-end">
+        <p-button [outlined]="true" (click)="resetForm()">{{
+          resetButtonLabel
+        }}</p-button>
+      </div>
+      <ng-container *ngIf="isFormEmpty"> Form Schema is empty </ng-container>
+      <ng-container *ngIf="!isFormEmpty">
+        <ng-container
+          *ngTemplateOutlet="
+            formSchema;
+            context: {
+              schema: formOuterSchema,
+              marginLeft: 0
+            }
+          "
+        >
+        </ng-container>
+        <div class="flex justify-content-end action-buttons gap-2">
+          <p-button
+            class="mr-2"
+            label="Cancel"
+            [outlined]="true"
+            (click)="cancelCallback()"
+          ></p-button>
+          <p-button (click)="submitForm()">{{ submitButtonLabel }}</p-button>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #formSchema let-schema="schema" let-marginLeft="marginLeft">
+  <ng-container *ngFor="let s of getKeys(schema)">
+    <ng-container
+      *ngTemplateOutlet="
+        formGroupTemplate;
+        context: {
+          group: mappedFormGroups[s],
+          model: mappedJsonSchema[s],
+          marginLeft: marginLeft,
+          key: s
+        }
+      "
+    ></ng-container>
+    <ng-container
+      *ngTemplateOutlet="
+        formSchema;
+        context: {
+          schema: schema[s],
+          marginLeft: marginLeft + 1
+        }
+      "
+    >
+    </ng-container>
+  </ng-container>
+</ng-template>
+<!-- CORE INPUT FIELD TEMPLATES -->
+<ng-template
+  #inputTemplate
+  let-data="data"
+  let-control="control"
+  let-group="group"
+>
+  <div
+    class="p-fluid"
+    [class]="data.label ? 'did-floating-label-content' : ''"
+    [formGroup]="group"
+  >
+    <input
+      [type]="data.inputType"
+      pInputText
+      [class]="data.label ? 'did-floating-input' : ''"
+      [attr.maxlength]="(data.maxLength ?? -1) > 0 ? data.maxLength : null"
+      [attr.minlength]="(data.minLength ?? -1) > 0 ? data.minLength : null"
+      [attr.min]="data.minimum"
+      [attr.max]="data.maximum"
+      [placeholder]="data.placeholder || ''"
+      [id]="control"
+      [formControlName]="control"
+      [pattern]="data.pattern || null"
+      [class.invalid]="
+        group.get(control).invalid &&
+        (group.get(control).dirty || group.get(control).touched)
+      "
+    />
+    <ng-container *ngIf="data.label">
+      <ng-container
+        *ngTemplateOutlet="
+          label;
+          context: {
+            labelTxt: data.label,
+            property: control,
+            required: checkIfRequired(control, group)
+          }
+        "
+      >
+      </ng-container>
+    </ng-container>
+  </div>
+  <ng-container
+    *ngTemplateOutlet="
+      validationMessage;
+      context: {
+        errors: group.get(control).errors,
+        touched: group.get(control).touched
+      }
+    "
+  ></ng-container>
+</ng-template>
+
+<ng-template #switch let-data="data" let-control="control" let-group="group">
+  <div class="p-fluid ml-2 mt-2" [formGroup]="group">
+    <p-inputSwitch [formControlName]="control"></p-inputSwitch>
+  </div>
+</ng-template>
+
+<ng-template
+  #radio
+  let-data="data"
+  let-control="control"
+  let-group="group"
+  let-allProperties="allProperties"
+  let-key="key"
+>
+  <div [formGroup]="group">
+    <p-selectButton
+      [options]="data.options"
+      [formControlName]="control"
+      optionLabel="label"
+      optionValue="value"
+      (onChange)="
+        radioChange(
+          group,
+          control,
+          getDependents(data.options, $event.value),
+          allProperties,
+          key
+        )
+      "
+    >
+    </p-selectButton>
+  </div>
+  <ng-container
+    *ngTemplateOutlet="
+      validationMessage;
+      context: {
+        errors: group.get(control).errors,
+        touched: group.get(control).touched
+      }
+    "
+  ></ng-container>
+</ng-template>
+
+<ng-template #select let-control="control" let-group="group" let-data="data">
+  <div class="p-fluid" [formGroup]="group">
+    <p-dropdown
+      [options]="data.options"
+      [formControlName]="control"
+      placeholder="{{ data.value || 'Select Option' }}"
+      [optionLabel]="data.optionLabel"
+    >
+    </p-dropdown>
+
+    <ng-container
+      *ngTemplateOutlet="
+        label;
+        context: {
+          labelTxt: data.label,
+          property: control,
+          required: data.isRequired
+        }
+      "
+    >
+    </ng-container>
+  </div>
+  <ng-container
+    *ngTemplateOutlet="
+      validationMessage;
+      context: {
+        errors: group.get(control).errors,
+        touched: group.get(control).touched
+      }
+    "
+  ></ng-container>
+</ng-template>
+
+<ng-template #textarea let-control="control" let-group="group" let-data="data">
+  <div class="p-fluid" [formGroup]="group">
+    <textarea
+      [id]="control"
+      rows="1"
+      cols="20"
+      [formControlName]="control"
+      pInputTextarea
+      [placeholder]="data.placeholder || ''"
+      [class.invalid-select]="
+        group.get(control).invalid &&
+        (group.get(control).dirty || group.get(control).touched)
+      "
+    ></textarea>
+
+    <ng-container
+      *ngTemplateOutlet="
+        label;
+        context: {
+          labelTxt: data.label,
+          property: control,
+          required: data.isRequired
+        }
+      "
+    >
+    </ng-container>
+    <ng-container
+      *ngTemplateOutlet="
+        validationMessage;
+        context: {
+          errors: group.get(control).errors,
+          touched: group.get(control).touched
+        }
+      "
+    ></ng-container>
+  </div>
+</ng-template>
+
+<ng-template #date let-control="control" let-group="group" let-data="data">
+  <div class="p-fluid" [formGroup]="group">
+    <p-calendar
+      [id]="control"
+      [formControlName]="control"
+      [maxDate]="max"
+      [minDate]="min"
+      [showIcon]="true"
+      [class.invalid-select]="
+        group.get(control).invalid &&
+        (group.get(control).dirty || group.get(control).touched)
+      "
+    ></p-calendar>
+
+    <ng-container
+      *ngTemplateOutlet="
+        label;
+        context: {
+          labelTxt: data.label,
+          property: control,
+          required: data.isRequired
+        }
+      "
+    >
+    </ng-container>
+  </div>
+  <ng-container
+    *ngTemplateOutlet="
+      validationMessage;
+      context: {
+        errors: group.get(control).errors,
+        touched: group.get(control).touched
+      }
+    "
+  ></ng-container>
+</ng-template>
+
+<ng-template #datetime let-control="control" let-group="group" let-data="data">
+  <div class="p-fluid" [formGroup]="group">
+    <p-calendar
+      [id]="control"
+      [formControlName]="control"
+      [showTime]="true"
+      [showSeconds]="true"
+      [showIcon]="true"
+      inputId="date1"
+      [class.invalid-select]="
+        group.get(control).invalid &&
+        (group.get(control).dirty || group.get(control).touched)
+      "
+    ></p-calendar>
+
+    <ng-container
+      *ngTemplateOutlet="
+        label;
+        context: {
+          labelTxt: data.label,
+          property: control,
+          required: data.isRequired
+        }
+      "
+      ><ng-container
+        *ngTemplateOutlet="
+          validationMessage;
+          context: {
+            errors: group.get(control).errors,
+            touched: group.get(control).touched
+          }
+        "
+      ></ng-container>
+    </ng-container>
+  </div>
+</ng-template>
+
+<ng-template
+  #multiSelect
+  let-control="control"
+  let-group="group"
+  let-data="data"
+>
+  <div class="p-fluid" [formGroup]="group">
+    <p-multiSelect
+      [formControlName]="control"
+      [options]="data.options"
+      [optionLabel]="data.optionLabel"      
+      placeholder="{{ data.placeholder || 'Select Option' }}"
+    >
+    </p-multiSelect>
+    <ng-container
+      *ngTemplateOutlet="
+        label;
+        context: {
+          labelTxt: data.label,
+          property: control,
+          required: data.isRequired
+        }
+      "
+    >
+    </ng-container>
+    <ng-container
+      *ngTemplateOutlet="
+        validationMessage;
+        context: {
+          errors: group.get(control).errors,
+          touched: group.get(control).touched
+        }
+      "
+    ></ng-container>
+  </div>
+</ng-template>
+
+<ng-template #validationMessage let-errors="errors" let-touched="touched">
+  <span class="opacity-90 text-sm mt-1 text-red-600" [ngClass]="!(errors && touched) ? 'no-error' : ''">
+    {{
+      errors && touched
+        ? errors["required"]
+          ? "field is required"
+          : errors["minlength"]
+          ? "minimum length " + errors["minlength"].requiredLength
+          : errors["maxlength"]
+          ? "minimum length " + errors["maxlength"].requiredLength
+          : errors["minDates"]
+          ? "minimum value " + errors["minDates"].min
+          : errors["maxDates"]
+          ? "maximum value " + errors["maxDates"].max
+          : errors["pattern"]
+          ? "pattern mismatch " + errors["pattern"].requiredPattern
+          : (errors | json)
+        : " "
+    }}
+  </span>
+</ng-template>
+
+<!-- CORE TEMPLATE -->
+<ng-template
+  #label
+  let-label="labelTxt"
+  let-property="property"
+  let-isRequired="required"
+>
+  <label
+    [class]="labelCss ? labelCss : 'did-floating-label'"
+    *ngIf="label"
+    [for]="property"
+  >
+    <span>
+      {{ label }}
+    </span>
+    <span class="required">
+      {{ isRequired ? "*" : "" }}
+    </span>
+  </label>
+</ng-template>
+
+<!-- FORM-GROUP  -->
+<ng-template
+  #formGroupTemplate
+  let-group="group"
+  let-model="model"
+  let-marginLeft="marginLeft"
+  let-key="key"
+>
+  <ng-container *ngIf="(dependentForms[key] ?? false) === false">
+    <div [formGroup]="group" [style]="'margin-left:' + marginLeft + 'rem'">
+      <div class="text-3xl font-bold">
+        {{ model.label }}
+      </div>
+      <div class="grid">
+        <ng-container
+          *ngFor="let property of getFormPropertyKeys(model.properties)"
+        >
+          <ng-container
+            *ngIf="
+              model.properties[property].inputType != 'object' &&
+              group.get(property) !== null
+            "
+          >
+            <div
+              [class]="
+                getFieldCssClass(
+                  model.properties[property].isDependent,
+                  model.properties[property].styleClass
+                )
+              "
+            >
+              <div class="flex align-items-center justify-content-between">
+                <span class="font-bold mb-1 text-primary-900">
+                  {{ model.properties[property].description ?? " " }}
+                </span>
+                <span class="text-xs"
+                  >{{
+                    getIndependentPropertyKeys(model.properties).indexOf(
+                      property
+                    ) + 1
+                  }}
+                  of
+                  {{
+                    getIndependentPropertyKeys(model.properties).length
+                  }}</span
+                >
+              </div>
+              <ng-container
+                *ngTemplateOutlet="
+                  model.properties[property].inputType === 'text' ||
+                  model.properties[property].inputType === 'password' ||
+                  model.properties[property].inputType === 'email' ||
+                  model.properties[property].inputType === 'tel' ||
+                  model.properties[property].inputType === 'number'
+                    ? inputTemplate
+                    : model.properties[property].inputType === 'date'
+                    ? date
+                    : model.properties[property].inputType === 'datetime'
+                    ? datetime
+                    : model.properties[property].inputType === 'textarea'
+                    ? textarea
+                    : model.properties[property].inputType === 'select'
+                    ? select
+                    : model.properties[property].inputType === 'switch'
+                    ? switch
+                    : model.properties[property].inputType === 'radio' ||
+                      model.properties[property].inputType === 'mcq'
+                    ? radio
+                    : model.properties[property].inputType === 'multi-select'
+                    ? multiSelect
+                    : null;
+                  context: {
+                    data: model.properties[property],
+                    control: property,
+                    group: group,
+                    allProperties: model.properties,
+                    key: key
+                  }
+                "
+              ></ng-container>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+    </div>
+  </ng-container>
+</ng-template>
